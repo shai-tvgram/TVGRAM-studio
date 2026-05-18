@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/user/Downloads/index_14.html -->
+<!-- saved from url=(0045)file:///C:/Users/user/Downloads/index_15.html -->
 <html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -308,7 +308,25 @@ textarea{resize:none;height:60px}
   </div>
   <div id="pop-admin" style="display:none">
     <div class="popup-info" id="pop-info"></div>
-    <button id="pop-blk-btn" onclick="toggleBlock()"></button>
+    <!-- כשהשעה פנויה: הוסף שידור -->
+    <div id="pop-admin-free" style="display:none">
+      <div class="field" style="margin-bottom:10px"><label>נושא השידור</label><input type="text" id="pop-admin-subj" placeholder="הקלטה, שידור חי..."></div>
+      <div class="time-row">
+        <div class="field" style="margin:0"><label>התחלה</label><input type="time" id="pop-admin-sh" value="09:00"></div>
+        <div class="time-sep">—</div>
+        <div class="field" style="margin:0"><label>סיום</label><input type="time" id="pop-admin-eh" value="10:00"></div>
+      </div>
+      <div class="field" style="margin-top:10px"><label>הערות</label><textarea id="pop-admin-notes" placeholder="הערות..."></textarea></div>
+      <div class="popup-acts">
+        <button class="btn-cancel" onclick="closePopup()">ביטול</button>
+        <button class="btn-send" onclick="adminAddEvent()">✓ הוסף שידור</button>
+      </div>
+      <button id="pop-blk-btn" onclick="toggleBlock()" style="margin-top:8px"></button>
+    </div>
+    <!-- כשיש הזמנה או חסימה -->
+    <div id="pop-admin-taken" style="display:none">
+      <button id="pop-blk-btn2" onclick="toggleBlock()"></button>
+    </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -441,11 +459,13 @@ function doLogout(){
 
 function setupTabs(id){
   document.querySelectorAll('#'+id+' .tab').forEach(btn=>{
-    btn.addEventListener('click',()=>{
+    const newBtn=btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn,btn);
+    newBtn.addEventListener('click',()=>{
       document.querySelectorAll('#'+id+' .tab').forEach(t=>t.classList.remove('active'));
-      btn.classList.add('active');
+      newBtn.classList.add('active');
       document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
-      document.getElementById(btn.dataset.p).classList.add('active');
+      document.getElementById(newBtn.dataset.p).classList.add('active');
     });
   });
 }
@@ -690,18 +710,41 @@ function openPopupAdmin(day,hour){
   const bk=getBooking(key);
   const closed=isBlocked(day,hour);
   const info=document.getElementById('pop-info');
-  const btn=document.getElementById('pop-blk-btn');
+  const freeDiv=document.getElementById('pop-admin-free');
+  const takenDiv=document.getElementById('pop-admin-taken');
+  const blkBtn=document.getElementById('pop-blk-btn');
+  const blkBtn2=document.getElementById('pop-blk-btn2');
+
   if(bk){
+    // יש הזמנה — הצג מידע בלבד + אפשרות חסימה
     const u=S.users.find(x=>x.id===bk.user_id);
     const lbl={pending:'ממתין לאישור',confirmed:'מאושר',rejected:'נדחה'}[bk.status];
-    info.innerHTML=`👤 ${u?u.name:'לקוח'}<br>📋 ${lbl}${bk.subject?'<br>🎵 '+bk.subject:''}${bk.notes?'<br>💬 '+bk.notes:''}`;
+    const isAdmin=(u&&u.role==='admin')||bk.user_id==='admin-event';
+    info.innerHTML=`${isAdmin?'📺':'👤'} ${u?u.name:(isAdmin?'שידור אדמין':'לקוח')}<br>📋 ${lbl}${bk.subject?'<br>🎵 '+bk.subject:''}${bk.notes?'<br>💬 '+bk.notes:''}`;
+    freeDiv.style.display='none';
+    takenDiv.style.display='block';
+    blkBtn2.textContent='🗑️ מחק שידור';
+    blkBtn2.className='btn-blk';
+    blkBtn2.onclick=()=>deleteAdminEvent(bk.id);
   }else if(closed){
     info.innerHTML='🔒 שעה זו חסומה';
+    freeDiv.style.display='none';
+    takenDiv.style.display='block';
+    blkBtn2.textContent='🔓 בטל חסימה';
+    blkBtn2.className='btn-unblk';
+    blkBtn2.onclick=toggleBlock;
   }else{
+    // פנוי — אפשר להוסיף שידור או לחסום
     info.innerHTML='✅ שעה זו פנויה';
+    freeDiv.style.display='block';
+    takenDiv.style.display='none';
+    document.getElementById('pop-admin-sh').value=String(hour).padStart(2,'0')+':00';
+    document.getElementById('pop-admin-eh').value=String(hour+1).padStart(2,'0')+':00';
+    document.getElementById('pop-admin-subj').value='';
+    document.getElementById('pop-admin-notes').value='';
+    blkBtn.textContent='🔒 חסום שעה זו';
+    blkBtn.className='btn-blk';
   }
-  if(closed){btn.textContent='🔓 בטל חסימה';btn.className='btn-unblk';}
-  else{btn.textContent='🔒 חסום שעה זו';btn.className='btn-blk';}
   document.getElementById('popup').style.display='block';
   document.getElementById('pop-ov').style.display='block';
 }
@@ -731,6 +774,39 @@ async function submitBooking(){
   }catch(e){toast('שגיאה בשליחת הבקשה','err');}
 }
 
+async function adminAddEvent(){
+  if(!_pd) return;
+  const sh=+document.getElementById('pop-admin-sh').value.split(':')[0];
+  const eh=+document.getElementById('pop-admin-eh').value.split(':')[0];
+  const subj=document.getElementById('pop-admin-subj').value.trim();
+  const notes=document.getElementById('pop-admin-notes').value.trim();
+  if(!subj){toast('נא למלא נושא השידור','err');return;}
+  if(eh<=sh){toast('שעת סיום חייבת להיות אחרי ההתחלה','err');return;}
+  const slots=[];
+  for(let h=sh;h<eh;h++) slots.push(skey(_pd,h));
+  const conflict=slots.find(k=>getBooking(k)||isBlocked(_pd,+k.split('_')[1]));
+  if(conflict){toast('חלק מהשעות תפוסות','err');return;}
+  try{
+    await api.addBooking({
+      id:'b'+Date.now(),
+      user_id:'admin',
+      user_name:'מנהל האולפן',
+      slots,subject:subj,notes,
+      status:'confirmed'  // מאושר מיידית
+    });
+    await refreshData();closePopup();renderAll();
+    toast('השידור נוסף ✓','ok');
+  }catch(e){toast('שגיאה בהוספת שידור','err');}
+}
+
+async function deleteAdminEvent(id){
+  try{
+    await api.updBooking(id,{status:'rejected'});
+    await refreshData();closePopup();renderAll();
+    toast('השידור הוסר','info');
+  }catch(e){toast('שגיאה','err');}
+}
+
 async function toggleBlock(){
   if(!_pd) return;
   const closed=isBlocked(_pd,_ph);
@@ -743,15 +819,16 @@ async function toggleBlock(){
       return d>=f&&d<=t&&_ph>=r.sh&&_ph<r.eh;
     });
     if(rule){
-      await removeBlock(rule.id);toast('החסימה בוטלה ✓','ok');
+      await removeBlock(rule.id);closePopup();toast('החסימה בוטלה ✓','ok');
     }else{
       toast('חלק מחסימה חוזרת — עדכן בטאב החסימות','info');
+      closePopup();
     }
   }else{
     const ds=_pd.getFullYear()+'-'+String(_pd.getMonth()+1).padStart(2,'0')+'-'+String(_pd.getDate()).padStart(2,'0');
     await addBlockDirect({id:'r'+Date.now(),sh:_ph,eh:_ph+1,df:ds,dt:ds,rep:'none',days:[],lbl:'חסום '+fmt(_pd)+' '+_ph+':00'});
+    closePopup();
   }
-  closePopup();
 }
 
 async function addBlockDirect(block){
