@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)file:///C:/Users/user/Downloads/index_4.html -->
+<!-- saved from url=(0044)file:///C:/Users/user/Downloads/index_6.html -->
 <html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -1213,10 +1213,13 @@ const DEFAULT_USERS = [
 
 function loadStore() {
   try {
+    const users      = JSON.parse(localStorage.getItem('studio_users'));
+    const bookings   = JSON.parse(localStorage.getItem('studio_bookings'));
+    const blockRules = JSON.parse(localStorage.getItem('studio_blockRules'));
     return {
-      users:      JSON.parse(localStorage.getItem('studio_users'))      || DEFAULT_USERS,
-      bookings:   JSON.parse(localStorage.getItem('studio_bookings'))   || [],
-      blockRules: JSON.parse(localStorage.getItem('studio_blockRules')) || [],
+      users:      Array.isArray(users)      ? users      : DEFAULT_USERS,
+      bookings:   Array.isArray(bookings)   ? bookings   : [],
+      blockRules: Array.isArray(blockRules) ? blockRules : [],
     };
   } catch(e) {
     return { users: DEFAULT_USERS, bookings: [], blockRules: [] };
@@ -1224,9 +1227,11 @@ function loadStore() {
 }
 
 function saveStore() {
-  localStorage.setItem('studio_users',      JSON.stringify(store.users));
-  localStorage.setItem('studio_bookings',   JSON.stringify(store.bookings));
-  localStorage.setItem('studio_blockRules', JSON.stringify(store.blockRules));
+  try {
+    localStorage.setItem('studio_users',      JSON.stringify(store.users));
+    localStorage.setItem('studio_bookings',   JSON.stringify(store.bookings));
+    localStorage.setItem('studio_blockRules', JSON.stringify(store.blockRules));
+  } catch(e) { /* file:// or private mode — silent fail */ }
 }
 
 const _loaded = loadStore();
@@ -1257,10 +1262,15 @@ function doLogin() {
   if (user.role === 'admin') {
     document.getElementById('client-tabs').style.display = 'none';
     document.getElementById('admin-tabs').style.display = 'flex';
-    document.getElementById('tab-schedule').classList.remove('active');
+    // make sure only admin-schedule is active
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById('tab-admin-schedule').classList.add('active');
     setupAdminTabs();
   } else {
+    document.getElementById('admin-tabs').style.display = 'none';
+    document.getElementById('client-tabs').style.display = 'flex';
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-schedule').classList.add('active');
     setupClientTabs();
   }
   renderAll();
@@ -1549,12 +1559,17 @@ function renderMyBookings() {
 
 // ─── ADMIN SCHEDULE ───────────────────────────────────────────
 function renderAdminSchedule() {
+  const grid = document.getElementById('admin-schedule-grid');
+  const daysRowEl = document.getElementById('admin-days-row');
+  const weekLabelEl = document.getElementById('admin-week-label');
+  if (!grid || !daysRowEl || !weekLabelEl) return;
+
   const days = getWeekDates(store.currentWeekOffset);
   const from = fmtDate(days[0]);
   const to = fmtDate(days[6]);
-  document.getElementById('admin-week-label').textContent = `${to} — ${from}`;
+  weekLabelEl.textContent = `${to} — ${from}`;
 
-  const daysRow = document.getElementById('admin-days-row');
+  const daysRow = daysRowEl;
   daysRow.innerHTML = '';
   days.forEach((d, i) => {
     const el = document.createElement('div');
@@ -1563,7 +1578,6 @@ function renderAdminSchedule() {
     daysRow.appendChild(el);
   });
 
-  const grid = document.getElementById('admin-schedule-grid');
   grid.innerHTML = '';
 
   HOURS.forEach(hour => {
