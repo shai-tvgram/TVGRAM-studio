@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/user/Downloads/index_10.html -->
+<!-- saved from url=(0045)file:///C:/Users/user/Downloads/index_11.html -->
 <html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -338,17 +338,25 @@ const DEFAULTS = {
     {id:'u2',name:'מיכל לוי',username:'michal',password:'1234',role:'client'},
     {id:'u3',name:'דני גולן',username:'dani',password:'1234',role:'client'},
   ],
-  bookings: [],
-  blocks: [],
 };
 
 function ls_get(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){return null;} }
 function ls_set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 
+// Load or initialize — never wipe existing data
+const _u = ls_get('sv_users');
+const _b = ls_get('sv_bookings');
+const _bl = ls_get('sv_blocks');
+
+// First ever load — seed defaults and save immediately
+if(!_u){ ls_set('sv_users', DEFAULTS.users); }
+if(!_b){ ls_set('sv_bookings', []); }
+if(!_bl){ ls_set('sv_blocks', []); }
+
 const S = {
-  users:    ls_get('sv_users')    || DEFAULTS.users,
-  bookings: ls_get('sv_bookings') || [],
-  blocks:   ls_get('sv_blocks')   || [],
+  users:    ls_get('sv_users'),
+  bookings: ls_get('sv_bookings'),
+  blocks:   ls_get('sv_blocks'),
   user: null,
   weekOff: 0,
 };
