@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVGRAM · איזור אישי</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
+  :root {
+    --bg:#0d0d0d; --bg2:#161616; --bg3:#1e1e1e; --bg4:#252525;
+    --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+    --text:#f0f0f0; --text2:#909090; --text3:#555;
+    --accent:#c8a96e; --accent2:#e8c98e;
+    --green:#4caf7d; --amber:#e8a030; --blue:#5b9cf6; --red:#e05c5c;
+    --radius:10px; --radius-lg:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+
+  /* LOGIN */
+  #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  #login-screen::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(200,169,110,0.07) 0%,transparent 70%);top:-100px;left:50%;transform:translateX(-50%);pointer-events:none}
+  .login-box{background:var(--bg2);border:0.5px solid var(--border2);border-radius:18px;padding:2.5rem 2rem;width:360px;position:relative;z-index:1}
+  .login-logo{text-align:center;margin-bottom:2rem}
+  .login-logo .brand{font-size:22px;font-weight:700;letter-spacing:0.08em;color:var(--accent)}
+  .login-logo .sub{font-size:12px;color:var(--text2);margin-top:4px;letter-spacing:0.05em}
+  .login-box label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;margin-top:16px}
+  .login-box input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-family:'Heebo',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;direction:ltr;text-align:right}
+  .login-box input:focus{border-color:var(--accent)}
+  .btn-login{width:100%;margin-top:24px;padding:11px;background:var(--accent);color:#1a1200;border:none;border-radius:var(--radius);font-family:'Heebo',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s,transform 0.1s}
+  .btn-login:hover{background:var(--accent2)}
+  .btn-login:active{transform:scale(0.98)}
+  .login-err{margin-top:12px;font-size:13px;color:var(--red);text-align:center;min-height:20px}
+
+  /* APP */
+  #app{display:none}
+  .topbar{height:56px;background:var(--bg2);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
+  .topbar-brand{font-size:16px;font-weight:700;color:var(--accent);letter-spacing:0.06em}
+  .topbar-right{display:flex;align-items:center;gap:16px}
+  .topbar-user{font-size:13px;color:var(--text2)}
+  .btn-logout{font-size:12px;color:var(--text3);background:none;border:0.5px solid var(--border2);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:'Heebo',sans-serif;transition:color 0.2s}
+  .btn-logout:hover{color:var(--text)}
+
+  /* MAIN */
+  .main{padding:1.5rem;max-width:1100px;margin:0 auto}
+  .page-title{font-size:20px;font-weight:600;margin-bottom:1.5rem}
+  .page-title span{color:var(--text2);font-weight:400;font-size:14px;margin-right:10px}
+  .top-actions{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+
+  /* CLIENT BAR */
+  .client-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem}
+  .client-chip{padding:6px 16px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Heebo',sans-serif;font-size:13px;transition:all 0.15s}
+  .client-chip:hover{border-color:var(--accent);color:var(--text)}
+  .client-chip.active{background:rgba(200,169,110,0.12);border-color:var(--accent);color:var(--accent);font-weight:500}
+
+  /* ENTRY CARD */
+  .entry-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);margin-bottom:1rem;overflow:hidden}
+  .entry-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;user-select:none;transition:background 0.15s}
+  .entry-header:hover{background:var(--bg3)}
+  .entry-header-left{display:flex;align-items:center;gap:12px}
+  .entry-title{font-size:15px;font-weight:500}
+  .entry-date{font-size:12px;color:var(--text2);margin-top:2px}
+  .badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;white-space:nowrap}
+  .badge-green{background:rgba(76,175,125,0.15);color:var(--green)}
+  .badge-amber{background:rgba(232,160,48,0.15);color:var(--amber)}
+  .badge-blue{background:rgba(91,156,246,0.15);color:var(--blue)}
+  .chevron{color:var(--text3);font-size:18px;transition:transform 0.2s;line-height:1}
+  .chevron.open{transform:rotate(180deg)}
+  .entry-body{padding:0 18px 18px;border-top:0.5px solid var(--border);display:none}
+  .entry-body.open{display:block}
+
+  /* FORM */
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:11px;color:var(--text2);margin-bottom:5px;letter-spacing:0.03em;text-transform:uppercase}
+  .field input,.field textarea,.field select{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s}
+  .field input:focus,.field textarea:focus{border-color:var(--accent)}
+  .field textarea{resize:vertical;min-height:56px}
+  .field input[readonly],.field textarea[readonly]{opacity:0.6;cursor:default}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .link-row{display:flex;gap:8px}
+  .link-row input{flex:1}
+  .btn-icon{padding:9px 12px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-size:16px;line-height:1;transition:color 0.2s}
+  .btn-icon:hover{color:var(--accent)}
+
+  /* SECTION HEAD */
+  .section-head{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin:18px 0 12px;display:flex;align-items:center;gap:8px}
+  .section-head::after{content:'';flex:1;height:0.5px;background:var(--border)}
+
+  /* REELS */
+  .reels-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  .reel-card{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:12px}
+  .reel-card.empty{border-style:dashed;opacity:0.6}
+  .reel-num{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:10px}
+  .time-block{background:var(--bg4);border:0.5px solid var(--border);border-radius:8px;padding:10px;margin-top:8px}
+  .time-block-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin-bottom:8px;font-weight:600}
+  .time-inner{display:grid;grid-template-columns:75px 1fr;gap:8px}
+  .time-inner .field{margin-bottom:0}
+
+  /* STATUS */
+  .status-select{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .status-opt{padding:5px 14px;border-radius:20px;border:0.5px solid var(--border2);background:none;color:var(--text2);font-family:'Heebo',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s}
+  .status-opt.sel-pending{background:rgba(232,160,48,0.15);border-color:var(--amber);color:var(--amber)}
+  .status-opt.sel-done{background:rgba(91,156,246,0.15);border-color:var(--blue);color:var(--blue)}
+  .status-opt.sel-aired{background:rgba(76,175,125,0.15);border-color:var(--green);color:var(--green)}
+
+  /* NOTES */
+  .admin-note-box{background:rgba(200,169,110,0.06);border:0.5px solid rgba(200,169,110,0.2);border-right:3px solid var(--accent);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6}
+  .admin-note-box strong{color:var(--accent)}
+  .info-box{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--text2);margin-bottom:16px}
+
+  /* BUTTONS */
+  .save-bar{display:flex;justify-content:flex-end;gap:10px;padding-top:14px;border-top:0.5px solid var(--border)}
+  .btn{padding:8px 20px;border-radius:var(--radius);border:0.5px solid var(--border2);background:none;color:var(--text2);font-family:'Heebo',sans-serif;font-size:13px;cursor:pointer;transition:all 0.15s}
+  .btn:hover{background:var(--bg3);color:var(--text)}
+  .btn-primary{background:var(--accent);color:#1a1200;border-color:var(--accent);font-weight:600}
+  .btn-primary:hover{background:var(--accent2)}
+  .btn-danger{color:var(--red);border-color:rgba(224,92,92,0.3)}
+  .btn-danger:hover{background:rgba(224,92,92,0.1);color:var(--red)}
+
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:1.5rem;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto}
+  .modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem}
+
+  /* MISC */
+  .loading{text-align:center;padding:3rem;color:var(--text2)}
+  .spinner{display:inline-block;width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin-bottom:12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .empty-state{text-align:center;padding:3rem;color:var(--text3);font-size:14px}
+
+  @media(max-width:700px){
+    .reels-grid{grid-template-columns:1fr}
+    .field-row{grid-template-columns:1fr}
+    .time-inner{grid-template-columns:1fr}
+    .main{padding:1rem}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="brand">TVGRAM</div>
+      <div class="sub">STUDIO · איזור אישי</div>
+    </div>
+    <label>שם משתמש</label>
+    <input type="text" id="login-user" placeholder="username" autocomplete="username">
+    <label>סיסמה</label>
+    <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    <button class="btn-login" id="login-btn" onclick="doLogin()">כניסה</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">TVGRAM STUDIO</div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbar-user"></span>
+      <button class="btn-logout" onclick="doLogout()">יציאה</button>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="admin-view" style="display:none">
+    <div class="main">
+      <div class="top-actions">
+        <div class="page-title">ניהול פניות</div>
+        <button class="btn btn-primary" onclick="openAddModal()">+ פניה חדשה</button>
+      </div>
+      <div class="client-bar" id="client-bar"></div>
+      <div id="admin-entries-list"></div>
+    </div>
+  </div>
+
+  <!-- CLIENT VIEW -->
+  <div id="client-view" style="display:none">
+    <div class="main">
+      <div class="page-title" id="client-page-title">האיזור האישי שלי</div>
+      <div id="client-entries-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD ENTRY MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">הוספת פניה חדשה</div>
+    <div class="field">
+      <label>לקוח</label>
+      <select id="modal-client"></select>
+    </div>
+    <div class="field">
+      <label>שם תכנית</label>
+      <input type="text" id="modal-title-inp" placeholder="שם התכנית">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>תאריך שידור מיועד</label>
+        <input type="date" id="modal-date">
+      </div>
+      <div class="field">
+        <label>סטטוס</label>
+        <select id="modal-status">
+          <option value="pending">ממתין לרילסים</option>
+          <option value="done">רילסים נשלחו</option>
+          <option value="aired">שודר</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>לינק לתכנית (Drive)</label>
+      <input type="url" id="modal-drive" placeholder="https://drive.google.com/...">
+    </div>
+    <div class="field">
+      <label>הערה ללקוח</label>
+      <textarea id="modal-note" placeholder="הערה שתוצג ללקוח..."></textarea>
+    </div>
+    <div class="save-bar">
+      <button class="btn" onclick="closeAddModal()">ביטול</button>
+      <button class="btn btn-primary" onclick="saveNewEntry()">הוספה</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://juclfakizugcblbruggo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1Y2xmYWtpenVnY2JsYnJ1Z2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwOTgzMDgsImV4cCI6MjA2MTY3NDMwOH0.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1Y2xmYWtpenVnY2JsYnJ1Z2dvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwOTgzMDgsImV4cCI6MjA2MTY3NDMwOH0';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let allClients  = [];
+let selectedClientId = null;
+let reelsCache = {};
+
+// ── LOGIN ──
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  const btn   = document.getElementById('login-btn');
+  errEl.textContent = '';
+  btn.textContent = 'נכנס...';
+  btn.disabled = true;
+
+  const { data, error } = await sb
+    .from('users')
+    .select('*')
+    .eq('username', username)
+    .eq('password', password)
+    .maybeSingle();
+
+  btn.textContent = 'כניסה';
+  btn.disabled = false;
+
+  if (error || !data) {
+    errEl.textContent = 'שם משתמש או סיסמה שגויים';
+    return;
+  }
+  sessionStorage.setItem('tvgram_user', JSON.stringify(data));
+  await initApp(data);
+}
+
+function doLogout() {
+  sessionStorage.removeItem('tvgram_user');
+  location.reload();
+}
+
+async function initApp(user) {
+  currentUser = user;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('topbar-user').textContent = user.name || user.username;
+
+  if (user.role === 'admin') {
+    document.getElementById('admin-view').style.display = 'block';
+    await loadClientsBar();
+  } else {
+    document.getElementById('client-view').style.display = 'block';
+    document.getElementById('client-page-title').innerHTML =
+      'האיזור האישי שלי <span>' + (user.name || user.username) + '</span>';
+    await loadClientEntries(user.id);
+  }
+}
+
+window.addEventListener('load', async () => {
+  const saved = sessionStorage.getItem('tvgram_user');
+  if (saved) {
+    try { await initApp(JSON.parse(saved)); }
+    catch(e) { sessionStorage.removeItem('tvgram_user'); }
+  }
+});
+
+// ── CLIENTS BAR ──
+async function loadClientsBar() {
+  const { data } = await sb.from('users').select('*').eq('role','client').order('name');
+  allClients = data || [];
+
+  const bar = document.getElementById('client-bar');
+  bar.innerHTML = '';
+  const sel = document.getElementById('modal-client');
+  sel.innerHTML = '';
+
+  allClients.forEach((c, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'client-chip' + (i === 0 ? ' active' : '');
+    chip.textContent = c.name || c.username;
+    chip.dataset.id = c.id;
+    chip.onclick = async () => {
+      document.querySelectorAll('.client-chip').forEach(ch => ch.classList.remove('active'));
+      chip.classList.add('active');
+      selectedClientId = c.id;
+      await loadAdminEntries(c.id);
+    };
+    bar.appendChild(chip);
+
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name || c.username;
+    sel.appendChild(opt);
+  });
+
+  if (allClients.length > 0) {
+    selectedClientId = allClients[0].id;
+    await loadAdminEntries(allClients[0].id);
+  }
+}
+
+// ── FETCH ENTRIES + REELS ──
+async function fetchEntries(userId) {
+  const { data: entries, error } = await sb
+    .from('entries').select('*')
+    .eq('user_id', userId)
+    .order('broadcast_date', { ascending: true });
+  if (error || !entries) return [];
+
+  const ids = entries.map(e => e.id);
+  if (ids.length) {
+    const { data: rls } = await sb.from('reels').select('*').in('entry_id', ids);
+    reelsCache = {};
+    (rls || []).forEach(r => {
+      if (!reelsCache[r.entry_id]) reelsCache[r.entry_id] = [];
+      reelsCache[r.entry_id].push(r);
+    });
+  }
+  return entries;
+}
+
+async function loadAdminEntries(userId) {
+  const list = document.getElementById('admin-entries-list');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div><br>טוען...</div>';
+  const entries = await fetchEntries(userId);
+  list.innerHTML = '';
+  if (!entries.length) {
+    list.innerHTML = '<div class="empty-state">אין פניות ללקוח זה עדיין</div>';
+    return;
+  }
+  entries.forEach(e => list.appendChild(buildAdminCard(e, reelsCache[e.id] || [])));
+}
+
+async function loadClientEntries(userId) {
+  const list = document.getElementById('client-entries-list');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div><br>טוען...</div>';
+  const entries = await fetchEntries(userId);
+  list.innerHTML = '';
+  if (!entries.length) {
+    list.innerHTML = '<div class="empty-state">אין פניות עדיין — הצוות יוסיף בקרוב ✨</div>';
+    return;
+  }
+  entries.forEach(e => list.appendChild(buildClientCard(e, reelsCache[e.id] || [])));
+}
+
+// ── HELPERS ──
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function statusBadge(s) {
+  if (s === 'aired') return '<span class="badge badge-green">שודר</span>';
+  if (s === 'done')  return '<span class="badge badge-blue">רילסים נשלחו</span>';
+  return '<span class="badge badge-amber">ממתין לרילסים</span>';
+}
+function eid(id) { return id.replace(/-/g,''); }
+
+// ── REEL CARD HTML ──
+function reelHtml(n, r, key, ro) {
+  const d  = r?.description  || '';
+  const st = r?.start_time   || '';
+  const sw = r?.start_words  || '';
+  const et = r?.end_time     || '';
+  const ew = r?.end_words    || '';
+  const empty = !d && !st && ro ? 'empty' : '';
+  const R = ro ? 'readonly' : '';
+  return `
+  <div class="reel-card ${empty}">
+    <div class="reel-num">ריל ${n}</div>
+    <div class="field"><label>תיאור</label>
+      <textarea rows="2" id="r${n}d${key}" ${R} placeholder="תיאור הקטע...">${d}</textarea></div>
+    <div class="time-block">
+      <div class="time-block-label">▶ התחלה</div>
+      <div class="time-inner">
+        <div class="field"><label>דקה</label>
+          <input type="text" id="r${n}st${key}" placeholder="00:00" value="${st}" ${R}></div>
+        <div class="field"><label>מילים פותחות</label>
+          <textarea rows="2" id="r${n}sw${key}" placeholder="הטקסט שממנו מתחיל הקטע..." ${R}>${sw}</textarea></div>
+      </div>
+    </div>
+    <div class="time-block">
+      <div class="time-block-label">◼ סיום</div>
+      <div class="time-inner">
+        <div class="field"><label>דקה</label>
+          <input type="text" id="r${n}et${key}" placeholder="00:00" value="${et}" ${R}></div>
+        <div class="field"><label>מילים אחרונות</label>
+          <textarea rows="2" id="r${n}ew${key}" placeholder="הטקסט שבו נגמר הקטע..." ${R}>${ew}</textarea></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── ADMIN CARD ──
+function buildAdminCard(entry, reels) {
+  const div = document.createElement('div');
+  div.className = 'entry-card';
+  div.id = 'ec-' + entry.id;
+  const k = eid(entry.id);
+  const r1 = reels.find(r=>r.reel_number===1);
+  const r2 = reels.find(r=>r.reel_number===2);
+  const r3 = reels.find(r=>r.reel_number===3);
+  if(r1) div.dataset.r1 = r1.id;
+  if(r2) div.dataset.r2 = r2.id;
+  if(r3) div.dataset.r3 = r3.id;
+  div.dataset.status = entry.status || 'pending';
+
+  div.innerHTML = `
+  <div class="entry-header" onclick="toggleCard('${entry.id}')">
+    <div class="entry-header-left">
+      <div>
+        <div class="entry-title">${entry.title}</div>
+        <div class="entry-date">${fmtDate(entry.broadcast_date)}</div>
+      </div>
+      ${statusBadge(entry.status)}
+    </div>
+    <span class="chevron" id="chev-${entry.id}">⌄</span>
+  </div>
+  <div class="entry-body" id="body-${entry.id}">
+    <div class="section-head">פרטי פניה</div>
+    <div class="field-row">
+      <div class="field"><label>שם תכנית</label>
+        <input type="text" id="et${k}" value="${entry.title||''}"></div>
+      <div class="field"><label>תאריך שידור</label>
+        <input type="date" id="ed${k}" value="${entry.broadcast_date||''}"></div>
+    </div>
+    <div class="field"><label>לינק לתכנית (Drive)</label>
+      <div class="link-row">
+        <input type="url" id="el${k}" value="${entry.drive_link||''}" placeholder="https://drive.google.com/...">
+        <button class="btn-icon" onclick="openLink(document.getElementById('el${k}').value)">↗</button>
+      </div>
+    </div>
+    <div class="field"><label>סטטוס</label>
+      <div class="status-select" id="es${k}">
+        <button class="status-opt ${entry.status==='pending'?'sel-pending':''}" onclick="pickStatus('${k}','pending')">ממתין לרילסים</button>
+        <button class="status-opt ${entry.status==='done'?'sel-done':''}"    onclick="pickStatus('${k}','done')">רילסים נשלחו</button>
+        <button class="status-opt ${entry.status==='aired'?'sel-aired':''}"  onclick="pickStatus('${k}','aired')">שודר</button>
+      </div>
+    </div>
+    <div class="section-head">רילסים</div>
+    <div class="reels-grid">
+      ${reelHtml(1,r1,k,false)}
+      ${reelHtml(2,r2,k,false)}
+      ${reelHtml(3,r3,k,false)}
+    </div>
+    <div class="field"><label>הערה ללקוח</label>
+      <textarea id="en${k}" placeholder="הערה שתוצג ללקוח...">${entry.admin_note||''}</textarea></div>
+    <div class="save-bar">
+      <button class="btn btn-danger" onclick="deleteEntry('${entry.id}')">מחיקה</button>
+      <button class="btn btn-primary" onclick="saveAdminEntry('${entry.id}','${k}')">שמירה</button>
+    </div>
+  </div>`;
+  return div;
+}
+
+// ── CLIENT CARD ──
+function buildClientCard(entry, reels) {
+  const div = document.createElement('div');
+  div.className = 'entry-card';
+  const canEdit = entry.status !== 'aired';
+  const k = eid(entry.id);
+  const r1 = reels.find(r=>r.reel_number===1);
+  const r2 = reels.find(r=>r.reel_number===2);
+  const r3 = reels.find(r=>r.reel_number===3);
+  if(r1) div.dataset.r1 = r1.id;
+  if(r2) div.dataset.r2 = r2.id;
+  if(r3) div.dataset.r3 = r3.id;
+
+  const driveBtn = entry.drive_link
+    ? `&nbsp;·&nbsp;<a href="${entry.drive_link}" target="_blank" style="color:var(--accent);font-size:12px;text-decoration:none">▶ צפייה בתכנית</a>` : '';
+  const noteHtml = entry.admin_note
+    ? `<div class="admin-note-box"><strong>הערה מהצוות:</strong> ${entry.admin_note}</div>` : '';
+
+  div.innerHTML = `
+  <div class="entry-header" onclick="toggleCard('${entry.id}')">
+    <div class="entry-header-left">
+      <div>
+        <div class="entry-title">${entry.title}</div>
+        <div class="entry-date">${fmtDate(entry.broadcast_date)}${driveBtn}</div>
+      </div>
+      ${statusBadge(entry.status)}
+    </div>
+    <span class="chevron" id="chev-${entry.id}">⌄</span>
+  </div>
+  <div class="entry-body" id="body-${entry.id}">
+    ${noteHtml}
+    ${canEdit ? '<div class="info-box">אנא מלא/י את 3 הרילסים — ציין/י דקה מדויקת ומילים פותחות/מסיימות לכל קטע.</div>' : ''}
+    <div class="reels-grid">
+      ${reelHtml(1,r1,k,!canEdit)}
+      ${reelHtml(2,r2,k,!canEdit)}
+      ${reelHtml(3,r3,k,!canEdit)}
+    </div>
+    ${canEdit ? `<div class="save-bar">
+      <button class="btn btn-primary" onclick="saveClientReels('${entry.id}','${k}',this)">שליחת הרילסים ↑</button>
+    </div>` : ''}
+  </div>`;
+  return div;
+}
+
+// ── TOGGLE ──
+function toggleCard(id) {
+  document.getElementById('body-'+id).classList.toggle('open');
+  document.getElementById('chev-'+id).classList.toggle('open');
+}
+
+// ── PICK STATUS ──
+function pickStatus(k, status) {
+  const bar = document.getElementById('es'+k);
+  bar.querySelectorAll('.status-opt').forEach(b => b.classList.remove('sel-pending','sel-done','sel-aired'));
+  const map = { pending:'sel-pending', done:'sel-done', aired:'sel-aired' };
+  const labels = { pending:'ממתין', done:'נשלחו', aired:'שודר' };
+  bar.querySelectorAll('.status-opt').forEach(b => {
+    if (b.textContent.includes(labels[status])) b.classList.add(map[status]);
+  });
+  bar.dataset.chosen = status;
+}
+
+// ── UPSERT REELS ──
+async function upsertReels(entryId, k, card) {
+  for (let n = 1; n <= 3; n++) {
+    const d  = document.getElementById(`r${n}d${k}`)?.value  || '';
+    const st = document.getElementById(`r${n}st${k}`)?.value || '';
+    const sw = document.getElementById(`r${n}sw${k}`)?.value || '';
+    const et = document.getElementById(`r${n}et${k}`)?.value || '';
+    const ew = document.getElementById(`r${n}ew${k}`)?.value || '';
+    if (!d && !st && !sw && !et && !ew) continue;
+    const existId = card?.dataset['r'+n];
+    const payload = { entry_id:entryId, reel_number:n,
+      description:d||null, start_time:st||null, start_words:sw||null,
+      end_time:et||null, end_words:ew||null };
+    if (existId) {
+      await sb.from('reels').update(payload).eq('id', existId);
+    } else {
+      await sb.from('reels').insert(payload);
+    }
+  }
+}
+
+// ── SAVE ADMIN ──
+async function saveAdminEntry(entryId, k) {
+  const bar = document.getElementById('es'+k);
+  const status = bar.dataset.chosen || 'pending';
+  const { error } = await sb.from('entries').update({
+    title:          document.getElementById('et'+k).value,
+    broadcast_date: document.getElementById('ed'+k).value || null,
+    drive_link:     document.getElementById('el'+k).value || null,
+    admin_note:     document.getElementById('en'+k).value || null,
+    status
+  }).eq('id', entryId);
+  if (error) { alert('שגיאה: '+error.message); return; }
+  const card = document.getElementById('ec-'+entryId);
+  await upsertReels(entryId, k, card);
+  showToast('נשמר ✓');
+  await loadAdminEntries(selectedClientId);
+}
+
+// ── SAVE CLIENT REELS ──
+async function saveClientReels(entryId, k, btn) {
+  btn.textContent = 'שולח...';
+  btn.disabled = true;
+  const card = btn.closest('.entry-card');
+  await upsertReels(entryId, k, card);
+  await sb.from('entries').update({ status:'done' }).eq('id', entryId);
+  showToast('הרילסים נשלחו לצוות! 🎬');
+  await loadClientEntries(currentUser.id);
+}
+
+// ── DELETE ──
+async function deleteEntry(entryId) {
+  if (!confirm('למחוק פניה זו לצמיתות?')) return;
+  await sb.from('reels').delete().eq('entry_id', entryId);
+  await sb.from('entries').delete().eq('id', entryId);
+  showToast('נמחק');
+  await loadAdminEntries(selectedClientId);
+}
+
+// ── ADD MODAL ──
+function openAddModal()  { document.getElementById('add-modal').classList.add('open'); }
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+async function saveNewEntry() {
+  const clientId = document.getElementById('modal-client').value;
+  const title    = document.getElementById('modal-title-inp').value.trim();
+  if (!title) { alert('נא למלא שם תכנית'); return; }
+  const { error } = await sb.from('entries').insert({
+    user_id:        clientId,
+    title,
+    broadcast_date: document.getElementById('modal-date').value  || null,
+    drive_link:     document.getElementById('modal-drive').value || null,
+    admin_note:     document.getElementById('modal-note').value  || null,
+    status:         document.getElementById('modal-status').value
+  });
+  if (error) { alert('שגיאה: '+error.message); return; }
+  ['modal-title-inp','modal-date','modal-drive','modal-note'].forEach(id =>
+    document.getElementById(id).value = '');
+  closeAddModal();
+  showToast('הפניה נוספה ✓');
+  // switch to that client
+  const chip = [...document.querySelectorAll('.client-chip')].find(c => c.dataset.id === clientId);
+  if (chip) chip.click(); else await loadAdminEntries(selectedClientId);
+}
+
+// ── MISC ──
+function openLink(url) { if (url) window.open(url, '_blank'); }
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
+    background:'var(--bg3)', border:'0.5px solid var(--border2)',
+    color:'var(--accent)', padding:'10px 24px', borderRadius:'20px',
+    fontSize:'13px', fontWeight:'500', zIndex:'999', transition:'opacity 0.4s'
+  });
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 2200);
+}
+
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>
