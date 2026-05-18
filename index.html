@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0044)file:///C:/Users/user/Downloads/index_4.html -->
+<html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Studio Sessions — הזמנת אולפן</title>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="./index_files/css2" rel="stylesheet">
 <style>
   :root {
     --bg: #0a0a0a;
@@ -813,7 +813,147 @@
     font-weight: 600;
   }
 
-  /* ── RESPONSIVE ── */
+  /* ── SLOT POPUP (calendar style) ── */
+  .slot-popup {
+    position: fixed;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    width: 280px;
+    z-index: 400;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+    animation: popIn 0.15s ease;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.95) translateY(4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .slot-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .slot-popup-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .slot-popup-close {
+    width: 26px;
+    height: 26px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .slot-popup .field { margin-bottom: 12px; }
+
+  .slot-popup .time-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .slot-popup .time-sep {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .slot-popup input[type=time] {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
+  .slot-popup textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Heebo', sans-serif;
+    resize: none;
+    height: 60px;
+    outline: none;
+  }
+
+  .slot-popup textarea:focus { border-color: var(--accent); }
+
+  .slot-popup-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .slot-popup-actions .btn-cancel {
+    flex: 1;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .slot-popup-actions .btn-submit {
+    flex: 2;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  /* admin popup — block/unblock */
+  .slot-popup .btn-block {
+    width: 100%;
+    background: #2a0808;
+    border: 1px solid #5a1a1a;
+    border-radius: 8px;
+    color: #f87171;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Heebo', sans-serif;
+    padding: 10px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s;
+  }
+
+  .slot-popup .btn-block:hover { background: #3a1010; }
+
+  .slot-popup .btn-unblock {
+    width: 100%;
+    background: var(--free);
+    border: 1px solid var(--free-border);
+    border-radius: 8px;
+    color: var(--free-text);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Heebo', sans-serif;
+    padding: 10px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s;
+  }
+
+  .slot-popup .btn-unblock:hover { background: #1f4a1f; }
+
+  .slot-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 390;
+  }
   @media (min-width: 600px) {
     .schedule-grid { grid-template-columns: 52px repeat(7, 1fr); }
     .slot { height: 44px; font-size: 10px; }
@@ -882,11 +1022,7 @@
       <div class="legend-item"><div class="legend-dot confirmed"></div><span>מאושר</span></div>
       <div class="legend-item"><div class="legend-dot" style="background:#6b2020"></div><span>לא זמין</span></div>
     </div>
-    <div style="padding: 16px;">
-      <button class="btn-primary" id="btn-request-open" onclick="openRequestForm()" style="display:none">
-        שלח בקשה (<span id="selected-count">0</span> שעות)
-      </button>
-    </div>
+    <div style="padding: 8px 16px 0;">
   </div>
 
   <!-- MY BOOKINGS TAB -->
@@ -956,11 +1092,11 @@
         <div class="field" id="block-days-field" style="display:none;margin-bottom:12px">
           <label>ימים בשבוע</label>
           <div class="days-checkboxes">
-            <label class="day-check"><input type="checkbox" name="bday" value="0" checked><span>א׳</span></label>
-            <label class="day-check"><input type="checkbox" name="bday" value="1" checked><span>ב׳</span></label>
-            <label class="day-check"><input type="checkbox" name="bday" value="2" checked><span>ג׳</span></label>
-            <label class="day-check"><input type="checkbox" name="bday" value="3" checked><span>ד׳</span></label>
-            <label class="day-check"><input type="checkbox" name="bday" value="4" checked><span>ה׳</span></label>
+            <label class="day-check"><input type="checkbox" name="bday" value="0" checked=""><span>א׳</span></label>
+            <label class="day-check"><input type="checkbox" name="bday" value="1" checked=""><span>ב׳</span></label>
+            <label class="day-check"><input type="checkbox" name="bday" value="2" checked=""><span>ג׳</span></label>
+            <label class="day-check"><input type="checkbox" name="bday" value="3" checked=""><span>ד׳</span></label>
+            <label class="day-check"><input type="checkbox" name="bday" value="4" checked=""><span>ה׳</span></label>
             <label class="day-check"><input type="checkbox" name="bday" value="5"><span>ו׳</span></label>
             <label class="day-check"><input type="checkbox" name="bday" value="6"><span>ש׳</span></label>
           </div>
@@ -1023,21 +1159,83 @@
   </div>
 </div>
 
+<!-- SLOT POPUP -->
+<div class="slot-popup-overlay" id="slot-popup-overlay" onclick="closeSlotPopup()" style="display:none"></div>
+<div class="slot-popup" id="slot-popup" style="display:none">
+  <div class="slot-popup-header">
+    <div class="slot-popup-title" id="slot-popup-title"></div>
+    <button class="slot-popup-close" onclick="closeSlotPopup()">×</button>
+  </div>
+  <!-- CLIENT view -->
+  <div id="slot-popup-client">
+    <div class="time-row">
+      <div class="field" style="margin:0">
+        <label>התחלה</label>
+        <input type="time" id="popup-time-start" value="09:00">
+      </div>
+      <div class="time-sep">—</div>
+      <div class="field" style="margin:0">
+        <label>סיום</label>
+        <input type="time" id="popup-time-end" value="10:00">
+      </div>
+    </div>
+    <div class="field">
+      <label>נושא / שם הפרויקט</label>
+      <input type="text" id="popup-subject" placeholder="לדוגמה: הקלטת אלבום, פודקאסט...">
+    </div>
+    <div class="field">
+      <label>הערות נוספות</label>
+      <textarea id="popup-notes" placeholder="ציוד נדרש, הערות מיוחדות..."></textarea>
+    </div>
+    <div class="slot-popup-actions">
+      <button class="btn-cancel" onclick="closeSlotPopup()">ביטול</button>
+      <button class="btn-submit" onclick="submitFromPopup()">שלח בקשה</button>
+    </div>
+  </div>
+  <!-- ADMIN view -->
+  <div id="slot-popup-admin" style="display:none">
+    <div id="slot-popup-booking-info" style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6"></div>
+    <button class="btn-block" id="slot-popup-block-btn" onclick="toggleBlockFromPopup()">🔒 חסום שעה זו</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ─── DATA STORE ───────────────────────────────────────────────
+const DEFAULT_USERS = [
+  { id: 'admin', name: 'מנהל האולפן', username: 'admin', password: 'studio2024', role: 'admin' },
+  { id: 'u1', name: 'יוסי כהן', username: 'yossi', password: '1234', role: 'client' },
+  { id: 'u2', name: 'מיכל לוי', username: 'michal', password: '1234', role: 'client' },
+  { id: 'u3', name: 'דני גולן', username: 'dani', password: '1234', role: 'client' },
+];
+
+function loadStore() {
+  try {
+    return {
+      users:      JSON.parse(localStorage.getItem('studio_users'))      || DEFAULT_USERS,
+      bookings:   JSON.parse(localStorage.getItem('studio_bookings'))   || [],
+      blockRules: JSON.parse(localStorage.getItem('studio_blockRules')) || [],
+    };
+  } catch(e) {
+    return { users: DEFAULT_USERS, bookings: [], blockRules: [] };
+  }
+}
+
+function saveStore() {
+  localStorage.setItem('studio_users',      JSON.stringify(store.users));
+  localStorage.setItem('studio_bookings',   JSON.stringify(store.bookings));
+  localStorage.setItem('studio_blockRules', JSON.stringify(store.blockRules));
+}
+
+const _loaded = loadStore();
 const store = {
-  users: [
-    { id: 'admin', name: 'מנהל האולפן', username: 'admin', password: 'studio2024', role: 'admin' },
-    { id: 'u1', name: 'יוסי כהן', username: 'yossi', password: '1234', role: 'client' },
-    { id: 'u2', name: 'מיכל לוי', username: 'michal', password: '1234', role: 'client' },
-    { id: 'u3', name: 'דני גולן', username: 'dani', password: '1234', role: 'client' },
-  ],
-  bookings: [],
-  currentUser: null,
-  selectedSlots: [],
+  users:           _loaded.users,
+  bookings:        _loaded.bookings,
+  blockRules:      _loaded.blockRules,
+  currentUser:     null,
+  selectedSlots:   [],
   currentWeekOffset: 0,
 };
 
@@ -1226,13 +1424,14 @@ function renderSchedule() {
         slot.title = 'לא זמין';
       } else if (isSelected) {
         slot.className = 'slot selected-pending';
-        slot.onclick = () => toggleSlot(key);
+        slot.onclick = () => openSlotPopupClient(day, hour);
       } else if (status === 'free') {
         slot.className = 'slot free';
-        slot.onclick = () => toggleSlot(key);
+        slot.onclick = () => openSlotPopupClient(day, hour);
       } else if (status === 'pending' && isMySlot) {
         slot.className = 'slot pending';
         slot.title = 'ממתין לאישור';
+        slot.onclick = () => openSlotPopupClient(day, hour);
       } else if (status === 'confirmed' && isMySlot) {
         slot.className = 'slot confirmed';
         slot.title = 'מאושר';
@@ -1259,14 +1458,7 @@ function toggleSlot(key) {
 }
 
 function updateRequestBtn() {
-  const btn = document.getElementById('btn-request-open');
-  const cnt = document.getElementById('selected-count');
-  if (store.selectedSlots.length > 0) {
-    btn.style.display = 'block';
-    cnt.textContent = store.selectedSlots.length;
-  } else {
-    btn.style.display = 'none';
-  }
+  // Request button replaced by popup — no-op
 }
 
 // ─── REQUEST FORM ─────────────────────────────────────────────
@@ -1348,6 +1540,7 @@ function renderMyBookings() {
         </div>
         <div class="status-pill ${b.status}">${statusLabel}</div>
       </div>
+      ${b.subject ? `<div class="booking-notes">🎵 ${b.subject}</div>` : ''}
       ${b.notes ? `<div class="booking-notes">📝 ${b.notes}</div>` : ''}
     `;
     list.appendChild(card);
@@ -1389,10 +1582,12 @@ function renderAdminSchedule() {
         const closed = isSlotBlocked(day, hour);
         slot.className = 'slot ' + (past ? 'blocked' : (closed ? 'closed' : 'free'));
         if (closed) slot.title = 'חסום';
+        if (!past) slot.onclick = () => openSlotPopupAdmin(day, hour);
       } else {
         slot.className = 'slot ' + (booking.status === 'rejected' ? 'blocked' : booking.status);
         const user = store.users.find(u => u.id === booking.userId);
         if (user) slot.title = user.name;
+        slot.onclick = () => openSlotPopupAdmin(day, hour);
       }
       grid.appendChild(slot);
     });
@@ -1427,6 +1622,7 @@ function renderAdminRequests() {
           <div class="req-datetime">${slotLabels}</div>
         </div>
       </div>
+      ${b.subject ? `<div class="req-notes">🎵 ${b.subject}</div>` : ''}
       ${b.notes ? `<div class="req-notes">💬 ${b.notes}</div>` : ''}
       <div class="req-actions">
         <button class="btn-approve" onclick="approveBooking('${b.id}')">✓ אשר</button>
@@ -1440,6 +1636,7 @@ function renderAdminRequests() {
 function approveBooking(id) {
   const b = store.bookings.find(x => x.id === id);
   if (b) b.status = 'confirmed';
+  saveStore();
   renderAdminRequests();
   renderAdminSchedule();
   showToast('ההזמנה אושרה ✓', 'success');
@@ -1448,6 +1645,7 @@ function approveBooking(id) {
 function rejectBooking(id) {
   const b = store.bookings.find(x => x.id === id);
   if (b) b.status = 'rejected';
+  saveStore();
   renderAdminRequests();
   renderAdminSchedule();
   showToast('ההזמנה נדחתה', 'error');
@@ -1479,6 +1677,7 @@ function addUser() {
   if (!name || !username || !password) { showToast('יש למלא את כל השדות', 'error'); return; }
   if (store.users.find(u => u.username === username)) { showToast('שם משתמש כבר קיים', 'error'); return; }
   store.users.push({ id: 'u' + Date.now(), name, username, password, role: 'client' });
+  saveStore();
   document.getElementById('new-name').value = '';
   document.getElementById('new-username').value = '';
   document.getElementById('new-password').value = '';
@@ -1489,12 +1688,165 @@ function addUser() {
 function deleteUser(id) {
   const idx = store.users.findIndex(u => u.id === id);
   if (idx !== -1) store.users.splice(idx, 1);
+  saveStore();
   renderUsersList();
   showToast('לקוח הוסר', 'info');
 }
 
+// ─── SLOT POPUP ───────────────────────────────────────────────
+let popupCurrentDay = null;
+let popupCurrentHour = null;
+
+function openSlotPopup(day, hour, isAdmin) {
+  popupCurrentDay = day;
+  popupCurrentHour = hour;
+
+  const dayName = FULL_DAYS[day.getDay()];
+  const dateStr = fmtDate(day);
+  document.getElementById('slot-popup-title').textContent = `${dayName} ${dateStr}`;
+
+  // Default times
+  document.getElementById('popup-time-start').value = `${String(hour).padStart(2,'0')}:00`;
+  document.getElementById('popup-time-end').value = `${String(hour+1).padStart(2,'0')}:00`;
+  document.getElementById('popup-notes').value = '';
+
+  document.getElementById('slot-popup-client').style.display = isAdmin ? 'none' : 'block';
+  document.getElementById('slot-popup-admin').style.display = isAdmin ? 'block' : 'none';
+
+  if (isAdmin) {
+    const key = slotKey(day, hour);
+    const booking = getSlotBooking(key);
+    const closed = isSlotBlocked(day, hour);
+    const infoEl = document.getElementById('slot-popup-booking-info');
+    const btn = document.getElementById('slot-popup-block-btn');
+
+    if (booking) {
+      const user = store.users.find(u => u.id === booking.userId);
+      const statusLabel = { pending: 'ממתין לאישור', confirmed: 'מאושר', rejected: 'נדחה' }[booking.status];
+      infoEl.innerHTML = `👤 ${user ? user.name : 'לקוח'}<br>📋 ${statusLabel}${booking.notes ? '<br>💬 ' + booking.notes : ''}`;
+    } else if (closed) {
+      infoEl.innerHTML = '🔒 שעה זו חסומה';
+    } else {
+      infoEl.innerHTML = '✅ שעה זו פנויה';
+    }
+
+    if (closed) {
+      btn.textContent = '🔓 בטל חסימה';
+      btn.className = 'btn-unblock';
+    } else {
+      btn.textContent = '🔒 חסום שעה זו';
+      btn.className = 'btn-block';
+    }
+  }
+
+  // Position popup near center on mobile
+  const popup = document.getElementById('slot-popup');
+  popup.style.display = 'block';
+  popup.style.top = '50%';
+  popup.style.left = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  document.getElementById('slot-popup-overlay').style.display = 'block';
+}
+
+function openSlotPopupClient(day, hour) { openSlotPopup(day, hour, false); }
+function openSlotPopupAdmin(day, hour)  { openSlotPopup(day, hour, true); }
+
+function closeSlotPopup() {
+  document.getElementById('slot-popup').style.display = 'none';
+  document.getElementById('slot-popup-overlay').style.display = 'none';
+  popupCurrentDay = null;
+  popupCurrentHour = null;
+}
+
+function submitFromPopup() {
+  if (!popupCurrentDay) return;
+  const startVal = document.getElementById('popup-time-start').value;
+  const endVal   = document.getElementById('popup-time-end').value;
+  const subject  = document.getElementById('popup-subject').value.trim();
+  const notes    = document.getElementById('popup-notes').value.trim();
+  const [sh] = startVal.split(':').map(Number);
+  const [eh] = endVal.split(':').map(Number);
+
+  if (!subject) { showToast('נא למלא נושא / שם הפרויקט', 'error'); return; }
+  if (eh <= sh) { showToast('שעת הסיום חייבת להיות אחרי ההתחלה', 'error'); return; }
+
+  const slots = [];
+  for (let h = sh; h < eh; h++) {
+    slots.push(slotKey(popupCurrentDay, h));
+  }
+
+  // Check any slot already taken
+  const conflict = slots.find(k => {
+    const b = getSlotBooking(k);
+    return b || isSlotBlocked(popupCurrentDay, parseInt(k.split('_')[1]));
+  });
+  if (conflict) { showToast('חלק מהשעות שבחרת תפוסות או חסומות', 'error'); return; }
+
+  store.bookings.push({
+    id: 'b' + Date.now(),
+    userId: store.currentUser.id,
+    userName: store.currentUser.name,
+    slots,
+    subject,
+    notes,
+    status: 'pending',
+    createdAt: new Date(),
+  });
+  saveStore();
+  closeSlotPopup();
+  store.selectedSlots = [];
+  renderSchedule();
+  showToast('הבקשה נשלחה! ממתין לאישור 🎵', 'info');
+}
+
+function toggleBlockFromPopup() {
+  if (!popupCurrentDay) return;
+  const day  = popupCurrentDay;
+  const hour = popupCurrentHour;
+  const closed = isSlotBlocked(day, hour);
+
+  if (closed) {
+    // Remove any single-slot block rule that covers this exact slot
+    const key = slotKey(day, hour);
+    const idx = store.blockRules.findIndex(r => {
+      if (r.repeat !== 'none') return false;
+      const d = new Date(day); d.setHours(0,0,0,0);
+      const from = new Date(r.dateFrom); from.setHours(0,0,0,0);
+      const to   = new Date(r.dateTo);   to.setHours(23,59,59,999);
+      return d >= from && d <= to && hour >= r.startHour && hour < r.endHour;
+    });
+    if (idx !== -1) {
+      store.blockRules.splice(idx, 1);
+      saveStore();
+      showToast('החסימה בוטלה ✓', 'success');
+    } else {
+      // Block is part of a recurring rule — add a one-off "unblock" override
+      // Simplest UX: inform admin
+      showToast('שעה זו חלק מחסימה חוזרת — עדכן בטאב החסימות', 'info');
+    }
+  } else {
+    // Create a single-slot block rule
+    const dateStr = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`;
+    store.blockRules.push({
+      id: 'r' + Date.now(),
+      startHour: hour,
+      endHour: hour + 1,
+      dateFrom: dateStr,
+      dateTo: dateStr,
+      repeat: 'none',
+      days: [],
+      label: `חסום ${fmtDate(day)} ${hour}:00`,
+    });
+    saveStore();
+    showToast('השעה נחסמה 🔒', 'info');
+  }
+
+  closeSlotPopup();
+  renderAdminSchedule();
+  renderBlockRules();
+}
+
 // ─── BLOCK RULES ──────────────────────────────────────────────
-// store.blockRules added here
 store.blockRules = [];
 
 // Repeat selector shows/hides day-picker
@@ -1580,6 +1932,7 @@ function addBlockRule() {
     label: label || repeatLabel(repeat),
   });
 
+  saveStore();
   document.getElementById('block-label').value = '';
   renderBlockRules();
   renderAdminSchedule();
@@ -1593,6 +1946,7 @@ function repeatLabel(r) {
 function removeBlockRule(id) {
   const idx = store.blockRules.findIndex(r => r.id === id);
   if (idx !== -1) store.blockRules.splice(idx, 1);
+  saveStore();
   renderBlockRules();
   renderAdminSchedule();
   showToast('החסימה הוסרה', 'info');
@@ -1632,10 +1986,15 @@ function changeWeek(dir) {
 }
 
 function renderAll() {
+  if (!store.currentUser) return;
   if (store.currentUser.role === 'admin') {
     renderAdminSchedule();
+    renderAdminRequests();
+    renderBlockRules();
+    renderUsersList();
   } else {
     renderSchedule();
+    renderMyBookings();
   }
 }
 
@@ -1658,5 +2017,6 @@ document.getElementById('inp-username').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('inp-password').focus();
 });
 </script>
-</body>
-</html>
+
+
+</div></body></html>
