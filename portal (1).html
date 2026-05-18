@@ -250,7 +250,7 @@ async function doLogin() {
   btn.disabled = true;
 
   const { data, error } = await sb
-    .from('users')
+    .from('clients')
     .select('*')
     .eq('username', username)
     .eq('password', password)
@@ -299,7 +299,7 @@ window.addEventListener('load', async () => {
 
 // ── CLIENTS BAR ──
 async function loadClientsBar() {
-  const { data } = await sb.from('users').select('*').eq('role','client').order('name');
+  const { data } = await sb.from('clients').select('*').eq('role','client').order('name');
   allClients = data || [];
 
   const bar = document.getElementById('client-bar');
