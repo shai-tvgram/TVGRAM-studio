@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/user/Downloads/index_15.html -->
+<!-- saved from url=(0045)file:///C:/Users/user/Downloads/index_16.html -->
 <html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -134,7 +134,37 @@ textarea{resize:none;height:60px}
 .btn-blk{width:100%;background:var(--red-bg);border:1px solid var(--red-brd);border-radius:8px;color:var(--red);font-size:13px;font-weight:700;font-family:'Heebo',sans-serif;padding:10px;cursor:pointer;margin-top:6px}
 .btn-unblk{width:100%;background:var(--green-bg);border:1px solid var(--green-brd);border-radius:8px;color:var(--green);font-size:13px;font-weight:700;font-family:'Heebo',sans-serif;padding:10px;cursor:pointer;margin-top:6px}
 
-.toast{position:fixed;top:70px;right:14px;left:14px;background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;font-size:13px;z-index:300;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+/* ══ EPISODES ══ */
+.ep-card{background:var(--surf);border:1px solid var(--brd);border-radius:14px;padding:16px;margin-bottom:12px}
+.ep-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.ep-title{font-size:15px;font-weight:700}
+.ep-date{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px}
+.ep-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--acc);text-decoration:none;margin-bottom:12px;border:1px solid var(--brd);border-radius:7px;padding:5px 10px}
+.ep-link:hover{border-color:var(--acc)}
+.ep-reels{display:flex;flex-direction:column;gap:8px}
+.reel-row{background:var(--surf2);border-radius:10px;padding:12px;border:1px solid var(--brd)}
+.reel-num{font-size:10px;font-weight:700;color:var(--acc);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.reel-times{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.reel-filled{border-color:var(--blue-brd)}
+.reel-empty{border-color:var(--brd);opacity:.6}
+.ep-actions{display:flex;gap:8px;margin-top:12px}
+.btn-sm{flex:1;background:transparent;border:1px solid var(--brd);border-radius:8px;color:var(--muted);font-size:12px;font-family:'Heebo',sans-serif;padding:8px;cursor:pointer;transition:all .2s}
+.btn-sm:hover{border-color:var(--acc);color:var(--acc)}
+.btn-sm.danger:hover{border-color:var(--red);color:var(--red)}
+.ep-status{border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase}
+.ep-status.draft{background:var(--surf2);color:var(--muted);border:1px solid var(--brd)}
+.ep-status.ready{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-brd)}
+.ep-status.done{background:var(--green-bg);color:var(--green);border:1px solid var(--green-brd)}
+.ep-form{background:var(--surf);border:1px solid var(--acc);border-radius:14px;padding:16px;margin-bottom:14px}
+.ep-form h3{font-size:13px;font-weight:700;color:var(--acc);margin-bottom:14px}
+.client-selector{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.client-chip{background:var(--surf2);border:1px solid var(--brd);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;transition:all .2s}
+.client-chip.active{background:var(--acc);color:#0a0a0a;border-color:var(--acc);font-weight:700}
+.ep-section-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;display:flex;align-items:center;justify-content:space-between}
+.ep-filter{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{background:var(--surf2);border:1px solid var(--brd);border-radius:20px;padding:4px 12px;font-size:11px;font-family:'Heebo',sans-serif;color:var(--muted);cursor:pointer}
+.filter-btn.active{background:var(--acc);color:#0a0a0a;border-color:var(--acc);font-weight:700}
+.input-dir-rtl{direction:rtl!important;text-align:right!important}background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;font-size:13px;z-index:300;display:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .toast.ok{border-color:var(--green-brd);color:var(--green)}
 .toast.err{border-color:var(--red-brd);color:var(--red)}
 .toast.info{border-color:var(--orange-brd);color:var(--orange)}
@@ -175,11 +205,13 @@ textarea{resize:none;height:60px}
 
   <div class="tabs" id="c-tabs" style="display:none">
     <button class="tab active" data-p="c-schedule">📅 לוח שעות</button>
+    <button class="tab" data-p="c-episodes">🎬 הפניות שלי</button>
     <button class="tab" data-p="c-bookings">🎵 ההזמנות שלי</button>
   </div>
   <div class="tabs" id="a-tabs" style="display:none">
     <button class="tab active" data-p="a-schedule">📅 לוח שעות</button>
     <button class="tab" data-p="a-requests">🔔 בקשות</button>
+    <button class="tab" data-p="a-episodes">🎬 פניות</button>
     <button class="tab" data-p="a-blocks">🔒 חסימות</button>
     <button class="tab" data-p="a-users">👥 לקוחות</button>
   </div>
@@ -224,7 +256,89 @@ textarea{resize:none;height:60px}
 
   <div id="a-requests" class="pane"><div class="list-wrap" id="a-req-list"></div></div>
 
-  <div id="a-blocks" class="pane">
+  <!-- ADMIN EPISODES -->
+  <div id="a-episodes" class="pane">
+    <div class="list-wrap">
+      <!-- טופס הוספת פנייה -->
+      <div class="ep-form">
+        <h3>🎬 פנייה חדשה</h3>
+        <div class="field"><label>בחר לקוח</label>
+          <div class="client-selector" id="ep-client-selector"></div>
+        </div>
+        <div class="field"><label>שם התכנית</label><input type="text" id="ep-title" class="input-dir-rtl" placeholder="שם הפרק / התכנית"></div>
+        <div class="row2">
+          <div class="field"><label>תאריך שידור מיועד</label><input type="date" id="ep-date"></div>
+          <div class="field"><label>סטטוס</label>
+            <select id="ep-status">
+              <option value="draft">טיוטה</option>
+              <option value="ready">מוכן לשידור</option>
+              <option value="done">שודר</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>לינק לדרייב</label><input type="text" id="ep-link" style="direction:ltr" placeholder="https://drive.google.com/..."></div>
+        <button class="btn-primary" onclick="addEpisode()" style="margin-top:4px">+ הוסף פנייה</button>
+      </div>
+
+      <!-- פילטר לקוח -->
+      <div class="ep-section-title">
+        <span>כל הפניות</span>
+      </div>
+      <div class="ep-filter" id="a-ep-filter"></div>
+      <div id="a-ep-list"></div>
+    </div>
+  </div>
+
+  <!-- CLIENT EPISODES -->
+  <div id="c-episodes" class="pane">
+    <div class="list-wrap">
+      <!-- טופס הוספת פנייה ע"י לקוח -->
+      <div class="ep-form" id="c-ep-add-form">
+        <h3>🎬 פנייה חדשה</h3>
+        <div class="field"><label>שם התכנית</label><input type="text" id="c-ep-title" class="input-dir-rtl" placeholder="שם הפרק / התכנית"></div>
+        <div class="field"><label>תאריך שידור מיועד</label><input type="date" id="c-ep-date"></div>
+        <div class="field"><label>לינק לדרייב (אופציונלי)</label><input type="text" id="c-ep-link" style="direction:ltr" placeholder="https://drive.google.com/..."></div>
+        <button class="btn-primary" onclick="clientAddEpisode()" style="margin-top:4px">+ הוסף פנייה</button>
+      </div>
+      <div class="ep-section-title"><span>הפניות שלי</span></div>
+      <div id="c-ep-list"></div>
+    </div>
+  </div>
+
+  <!-- REEL EDIT POPUP -->
+  <div class="popup-ov" id="reel-ov" onclick="closeReelPopup()"></div>
+  <div class="popup" id="reel-popup" style="width:320px">
+    <div class="popup-hdr">
+      <div class="popup-title" id="reel-popup-title"></div>
+      <button class="popup-close" onclick="closeReelPopup()">×</button>
+    </div>
+    <div id="reel-popup-body"></div>
+  </div>
+
+  <!-- EPISODE EDIT POPUP (admin) -->
+  <div class="popup-ov" id="ep-edit-ov" onclick="closeEpEdit()"></div>
+  <div class="popup" id="ep-edit-popup" style="width:310px">
+    <div class="popup-hdr">
+      <div class="popup-title">עריכת פנייה</div>
+      <button class="popup-close" onclick="closeEpEdit()">×</button>
+    </div>
+    <div class="field"><label>שם התכנית</label><input type="text" id="eedit-title" class="input-dir-rtl"></div>
+    <div class="row2">
+      <div class="field"><label>תאריך שידור</label><input type="date" id="eedit-date"></div>
+      <div class="field"><label>סטטוס</label>
+        <select id="eedit-status">
+          <option value="draft">טיוטה</option>
+          <option value="ready">מוכן</option>
+          <option value="done">שודר</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>לינק לדרייב</label><input type="text" id="eedit-link" style="direction:ltr"></div>
+    <div class="popup-acts">
+      <button class="btn-cancel" onclick="closeEpEdit()">ביטול</button>
+      <button class="btn-send" onclick="saveEpEdit()">שמור</button>
+    </div>
+  </div>
     <div class="list-wrap">
       <div class="blk-form">
         <h3>🔒 הוסף חסימה</h3>
@@ -284,7 +398,7 @@ textarea{resize:none;height:60px}
       </div>
     </div>
   </div>
-</div>
+
 
 <!-- POPUP -->
 <div class="popup-ov" id="pop-ov" onclick="closePopup()"></div>
@@ -411,9 +525,7 @@ async function init(){
   try{
     const [users,bookings,blocks] = await Promise.all([api.getUsers(),api.getBookings(),api.getBlocks()]);
     S.users=users||[]; S.bookings=bookings||[]; S.blocks=blocks||[];
-  }catch(e){
-    console.error('init error',e);
-  }
+  }catch(e){ console.error('init error',e); }
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
 }
@@ -430,6 +542,7 @@ async function doLogin(){
   const app=document.getElementById('app');
   app.style.display='flex';app.style.flexDirection='column';
   document.getElementById('topbar-name').textContent=user.name;
+  await loadEpisodes();
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
   if(user.role==='admin'){
     document.getElementById('a-tabs').style.display='flex';
@@ -475,13 +588,17 @@ async function refreshData(){
   try{
     const [bookings,blocks,users] = await Promise.all([api.getBookings(),api.getBlocks(),api.getUsers()]);
     S.bookings=bookings||[];S.blocks=blocks||[];S.users=users||[];
+    await loadEpisodes();
   }catch(e){console.error(e);}
 }
 
 function renderAll(){
   if(!S.user) return;
-  if(S.user.role==='admin'){renderAdminSchedule();renderRequests();renderBlocks();renderUsers();}
-  else{renderClientSchedule();renderMyBookings();}
+  if(S.user.role==='admin'){
+    renderAdminSchedule();renderRequests();renderAdminEpisodes();renderBlocks();renderUsers();
+  }else{
+    renderClientSchedule();renderMyBookings();renderClientEpisodes();
+  }
 }
 
 function changeWeek(d){S.weekOff+=d;renderAll();}
@@ -838,7 +955,244 @@ async function addBlockDirect(block){
   }catch(e){toast('שגיאה','err');}
 }
 
-// ══ TOAST ══
+// ══ EPISODES API ══
+const epApi = {
+  get: (uid)=> sb('episodes','GET',null, uid ? `?user_id=eq.${uid}&order=created_at.desc` : '?order=created_at.desc'),
+  add: (e)=> sb('episodes','POST',e),
+  upd: (id,data)=> sb(`episodes?id=eq.${id}`,'PATCH',data),
+  del: (id)=> sb('episodes','DELETE',null,`?id=eq.${id}`),
+};
+
+let _episodes = [];
+let _epFilter = 'all';
+let _epEditId = null;
+
+async function loadEpisodes(){
+  _episodes = await epApi.get(S.user.role==='client'?S.user.id:null) || [];
+}
+
+// ══ ADMIN: ADD EPISODE ══
+let _epClientId = null;
+
+function initEpClientSelector(){
+  const el = document.getElementById('ep-client-selector');
+  if(!el) return;
+  const clients = S.users.filter(u=>u.role==='client');
+  el.innerHTML = clients.map(u=>
+    `<div class="client-chip${_epClientId===u.id?' active':''}" onclick="selectEpClient('${u.id}','${u.name}')">${u.name}</div>`
+  ).join('');
+}
+
+function selectEpClient(id, name){
+  _epClientId = id;
+  document.querySelectorAll('.client-chip').forEach(c=>{
+    c.classList.toggle('active', c.textContent===name);
+  });
+}
+
+async function addEpisode(){
+  if(!_epClientId){toast('יש לבחור לקוח','err');return;}
+  const title=document.getElementById('ep-title').value.trim();
+  const date=document.getElementById('ep-date').value;
+  const link=document.getElementById('ep-link').value.trim();
+  const status=document.getElementById('ep-status').value;
+  if(!title){toast('יש למלא שם תכנית','err');return;}
+  const reels=[{start:'',end:'',title:'',note:''},{start:'',end:'',title:'',note:''},{start:'',end:'',title:'',note:''}];
+  try{
+    await epApi.add({id:'ep'+Date.now(),user_id:_epClientId,title,air_date:date||null,drive_link:link||null,reels,status});
+    await loadEpisodes();
+    document.getElementById('ep-title').value='';
+    document.getElementById('ep-date').value='';
+    document.getElementById('ep-link').value='';
+    renderAdminEpisodes();
+    toast('הפנייה נוספה ✓','ok');
+  }catch(e){toast('שגיאה בהוספת פנייה','err');console.error(e);}
+}
+
+// ══ CLIENT: ADD EPISODE ══
+async function clientAddEpisode(){
+  const title=document.getElementById('c-ep-title').value.trim();
+  const date=document.getElementById('c-ep-date').value;
+  const link=document.getElementById('c-ep-link').value.trim();
+  if(!title){toast('יש למלא שם תכנית','err');return;}
+  const reels=[{start:'',end:'',title:'',note:''},{start:'',end:'',title:'',note:''},{start:'',end:'',title:'',note:''}];
+  try{
+    await epApi.add({id:'ep'+Date.now(),user_id:S.user.id,title,air_date:date||null,drive_link:link||null,reels,status:'draft'});
+    await loadEpisodes();
+    document.getElementById('c-ep-title').value='';
+    document.getElementById('c-ep-date').value='';
+    document.getElementById('c-ep-link').value='';
+    renderClientEpisodes();
+    toast('הפנייה נוספה ✓','ok');
+  }catch(e){toast('שגיאה','err');}
+}
+
+// ══ RENDER HELPERS ══
+function statusLabel(s){return{draft:'טיוטה',ready:'מוכן לשידור',done:'שודר'}[s]||s;}
+
+function reelsFilled(reels){return (reels||[]).filter(r=>r.start||r.title).length;}
+
+function episodeCardHTML(ep, isAdmin){
+  const reels = ep.reels||[];
+  const filled = reelsFilled(reels);
+  const statusClass = ep.status||'draft';
+  const user = isAdmin ? S.users.find(u=>u.id===ep.user_id) : null;
+  const reelsHTML = reels.map((r,i)=>{
+    const hasDat = r.start||r.title;
+    return `<div class="reel-row ${hasDat?'reel-filled':'reel-empty'}">
+      <div class="reel-num">רילס ${i+1}${hasDat?' ✓':''}</div>
+      ${hasDat?`
+        <div style="font-size:12px;color:var(--blue);font-family:'Space Mono',monospace;margin-bottom:4px">⏱ ${r.start||'--:--'} – ${r.end||'--:--'}</div>
+        ${r.title?`<div style="font-size:13px;font-weight:600;margin-bottom:3px">${r.title}</div>`:''}
+        ${r.note?`<div style="font-size:11px;color:var(--muted)">${r.note}</div>`:''}
+      `:'<div style="font-size:11px;color:var(--muted)">טרם מולא</div>'}
+    </div>`;
+  }).join('');
+
+  return `<div class="ep-card">
+    <div class="ep-head">
+      <div>
+        ${isAdmin&&user?`<div style="font-size:10px;color:var(--acc);font-weight:700;margin-bottom:3px">👤 ${user.name}</div>`:''}
+        <div class="ep-title">${ep.title}</div>
+        <div class="ep-date">${ep.air_date?'📡 '+ep.air_date:''}</div>
+      </div>
+      <div class="ep-status ${statusClass}">${statusLabel(ep.status)}</div>
+    </div>
+    ${ep.drive_link?`<a class="ep-link" href="${ep.drive_link}" target="_blank">🎬 פתח בדרייב</a>`:''}
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">רילסים: ${filled}/3 מולאו</div>
+    <div class="ep-reels">${reelsHTML}</div>
+    <div class="ep-actions">
+      <button class="btn-sm" onclick="openReelPopup('${ep.id}')">✏️ עדכן רילסים</button>
+      ${isAdmin?`<button class="btn-sm" onclick="openEpEdit('${ep.id}')">⚙️ עריכה</button>`:''}
+      ${isAdmin?`<button class="btn-sm danger" onclick="deleteEpisode('${ep.id}')">🗑️</button>`:''}
+    </div>
+  </div>`;
+}
+
+// ══ ADMIN EPISODES ══
+function renderAdminEpisodes(){
+  initEpClientSelector();
+  // filter buttons
+  const filterEl = document.getElementById('a-ep-filter');
+  const clients = [...new Set(_episodes.map(e=>e.user_id))].map(id=>S.users.find(u=>u.id===id)).filter(Boolean);
+  filterEl.innerHTML = `<button class="filter-btn${_epFilter==='all'?' active':''}" onclick="setEpFilter('all')">הכל</button>`
+    + clients.map(u=>`<button class="filter-btn${_epFilter===u.id?' active':''}" onclick="setEpFilter('${u.id}')">${u.name}</button>`).join('');
+
+  const filtered = _epFilter==='all' ? _episodes : _episodes.filter(e=>e.user_id===_epFilter);
+  const el = document.getElementById('a-ep-list');
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎬</div>אין פניות עדיין</div>';return;}
+  el.innerHTML = filtered.map(ep=>episodeCardHTML(ep,true)).join('');
+}
+
+function setEpFilter(id){_epFilter=id;renderAdminEpisodes();}
+
+// ══ CLIENT EPISODES ══
+function renderClientEpisodes(){
+  const el = document.getElementById('c-ep-list');
+  const mine = _episodes.filter(e=>e.user_id===S.user.id);
+  if(!mine.length){el.innerHTML='<div class="empty"><div class="empty-icon">🎬</div>אין פניות עדיין</div>';return;}
+  el.innerHTML = mine.map(ep=>episodeCardHTML(ep,false)).join('');
+}
+
+// ══ REEL POPUP ══
+let _reelEpId = null;
+
+function openReelPopup(epId){
+  _reelEpId = epId;
+  const ep = _episodes.find(e=>e.id===epId);
+  if(!ep) return;
+  document.getElementById('reel-popup-title').textContent = ep.title;
+  const reels = ep.reels||[{},{},{}];
+  document.getElementById('reel-popup-body').innerHTML = `
+    ${reels.map((r,i)=>`
+      <div style="background:var(--surf2);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--brd)">
+        <div class="reel-num">רילס ${i+1}</div>
+        <div class="reel-times">
+          <div class="field" style="margin:0"><label>התחלה (דק׳)</label><input type="text" id="r${i}-start" value="${r.start||''}" placeholder="00:00" style="direction:ltr;text-align:center"></div>
+          <div class="field" style="margin:0"><label>סיום (דק׳)</label><input type="text" id="r${i}-end" value="${r.end||''}" placeholder="01:30" style="direction:ltr;text-align:center"></div>
+        </div>
+        <div class="field" style="margin-bottom:8px"><label>כותרת הרילס</label><input type="text" id="r${i}-title" value="${r.title||''}" class="input-dir-rtl" placeholder="כותרת קצרה..."></div>
+        <div class="field" style="margin:0"><label>הערה</label><input type="text" id="r${i}-note" value="${r.note||''}" class="input-dir-rtl" placeholder="הערה נוספת..."></div>
+      </div>
+    `).join('')}
+    <div class="popup-acts">
+      <button class="btn-cancel" onclick="closeReelPopup()">ביטול</button>
+      <button class="btn-send" onclick="saveReels()">שמור רילסים</button>
+    </div>
+  `;
+  document.getElementById('reel-popup').style.display='block';
+  document.getElementById('reel-ov').style.display='block';
+}
+
+function closeReelPopup(){
+  document.getElementById('reel-popup').style.display='none';
+  document.getElementById('reel-ov').style.display='none';
+  _reelEpId=null;
+}
+
+async function saveReels(){
+  if(!_reelEpId) return;
+  const reels = [0,1,2].map(i=>({
+    start: document.getElementById(`r${i}-start`).value.trim(),
+    end:   document.getElementById(`r${i}-end`).value.trim(),
+    title: document.getElementById(`r${i}-title`).value.trim(),
+    note:  document.getElementById(`r${i}-note`).value.trim(),
+  }));
+  try{
+    await epApi.upd(_reelEpId,{reels});
+    await loadEpisodes();
+    closeReelPopup();
+    if(S.user.role==='admin') renderAdminEpisodes();
+    else renderClientEpisodes();
+    toast('הרילסים נשמרו ✓','ok');
+  }catch(e){toast('שגיאה בשמירה','err');}
+}
+
+// ══ EPISODE EDIT (ADMIN) ══
+function openEpEdit(epId){
+  _epEditId=epId;
+  const ep=_episodes.find(e=>e.id===epId);
+  if(!ep) return;
+  document.getElementById('eedit-title').value=ep.title||'';
+  document.getElementById('eedit-date').value=ep.air_date||'';
+  document.getElementById('eedit-link').value=ep.drive_link||'';
+  document.getElementById('eedit-status').value=ep.status||'draft';
+  document.getElementById('ep-edit-popup').style.display='block';
+  document.getElementById('ep-edit-ov').style.display='block';
+}
+
+function closeEpEdit(){
+  document.getElementById('ep-edit-popup').style.display='none';
+  document.getElementById('ep-edit-ov').style.display='none';
+  _epEditId=null;
+}
+
+async function saveEpEdit(){
+  if(!_epEditId) return;
+  const data={
+    title:document.getElementById('eedit-title').value.trim(),
+    air_date:document.getElementById('eedit-date').value||null,
+    drive_link:document.getElementById('eedit-link').value.trim()||null,
+    status:document.getElementById('eedit-status').value,
+  };
+  try{
+    await epApi.upd(_epEditId,data);
+    await loadEpisodes();
+    closeEpEdit();
+    renderAdminEpisodes();
+    toast('הפנייה עודכנה ✓','ok');
+  }catch(e){toast('שגיאה','err');}
+}
+
+async function deleteEpisode(id){
+  if(!confirm('למחוק את הפנייה?')) return;
+  try{
+    await epApi.del(id);
+    await loadEpisodes();
+    renderAdminEpisodes();
+    toast('הפנייה נמחקה','info');
+  }catch(e){toast('שגיאה','err');}
+}
 let _tt;
 function toast(msg,type='info'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type;el.style.display='block';clearTimeout(_tt);_tt=setTimeout(()=>el.style.display='none',3000);}
 
