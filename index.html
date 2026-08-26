@@ -785,4 +785,10 @@ init();
 </script>
 
 
-</body></html>
+<script>
+fetch('./cms-content.json').then(r=>r.json()).then(c=>{
+  document.title=c.pageTitle||document.title;
+  const subtitle=document.querySelector('.login-sub'); if(subtitle&&c.loginSubtitle) subtitle.textContent=c.loginSubtitle;
+  const heading=document.querySelector('.login-card h2'); if(heading&&c.loginHeading) heading.textContent=c.loginHeading;
+}).catch(()=>{});
+</script></body></html>
